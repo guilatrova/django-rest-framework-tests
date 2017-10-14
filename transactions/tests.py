@@ -76,14 +76,22 @@ class TransactionsSerializersTestCase(TestCase):
         self.assertTrue(serializer.is_valid())
 
 class TransactionsViewsTestCase(APITestCase):
-    def test_saves_using_logged_user(self):
-        user = MagicMock()
-        view = TransactionViewSet(request=MagicMock(user=user))
 
+    def setUp(self):
+        self.user = MagicMock()
+        self.view = TransactionViewSet(request=MagicMock(user=self.user))
+
+    @patch('transactions.models.Transaction.objects', side_effect=MagicMock())
+    def test_queryset_filters_by_active_user(self, mock):
+        self.view.get_queryset()
+
+        mock.filter.assert_called_once_with(user=self.user)
+
+    def test_saves_using_active_user(self):
         mock = MagicMock()
-        view.perform_create(mock)
+        self.view.perform_create(mock)
 
-        mock.save.assert_called_once_with(user=user)        
+        mock.save.assert_called_once_with(user=self.user)
 
 class TransactionsPermissionsTestCase(TestCase):
     def setUp(self):
