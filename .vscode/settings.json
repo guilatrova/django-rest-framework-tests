@@ -1,3 +1,4 @@
 {
-    "python.pythonPath": "c:/Users/guilh/Desktop/Programming/Django/drf-tests/venv/scripts/python.exe"
+    "python.pythonPath": "c:/Users/guilh/Desktop/Programming/Django/drf-tests/venv/scripts/python.exe",
+    "python.linting.pylintEnabled": false
 }
