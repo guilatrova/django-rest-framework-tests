@@ -1,7 +1,8 @@
 from django.test import TestCase
+from rest_framework.test import APITestCase
 from django.urls import reverse, resolve
 from django.contrib.auth.models import User
-from mock import MagicMock
+from mock import patch, MagicMock
 
 from transactions.views import TransactionViewSet
 from transactions.serializers import TransactionSerializer
@@ -57,8 +58,7 @@ class TransactionsSerializersTestCase(TestCase):
         self.user = User.objects.create_user(username='tester')
         self.serializer_data = {
             'description': 'description', 
-            'value': 10,
-            'user': self.user.id
+            'value': 10
         }
 
     def test_serializer_should_not_allows_value_0(self):
@@ -75,6 +75,15 @@ class TransactionsSerializersTestCase(TestCase):
 
         self.assertTrue(serializer.is_valid())
 
+class TransactionsViewsTestCase(APITestCase):
+    def test_saves_using_logged_user(self):
+        user = MagicMock()
+        view = TransactionViewSet(request=MagicMock(user=user))
+
+        mock = MagicMock()
+        view.perform_create(mock)
+
+        mock.save.assert_called_once_with(user=user)        
 
 class TransactionsPermissionsTestCase(TestCase):
     def setUp(self):

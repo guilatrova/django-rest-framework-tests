@@ -8,3 +8,6 @@ class TransactionViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticated, IsOwner)
     queryset = Transaction.objects.all()
     serializer_class = TransactionSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
