@@ -1,9 +1,11 @@
 from django.test import TestCase
 from django.urls import reverse, resolve
 from django.contrib.auth.models import User
+from mock import MagicMock
 
 from transactions.views import TransactionViewSet
 from transactions.serializers import TransactionSerializer
+from transactions.permissions import IsOwner
 
 class TransactionsUrlsTestCase(TestCase):
 
@@ -72,3 +74,20 @@ class TransactionsSerializersTestCase(TestCase):
         serializer = TransactionSerializer(data=self.serializer_data)
 
         self.assertTrue(serializer.is_valid())
+
+
+class TransactionsPermissionsTestCase(TestCase):
+    def setUp(self):
+        self.request = MagicMock(user=MagicMock())
+        self.view = MagicMock()
+
+    def test_permission_fails_when_user_is_not_owner(self):
+        transaction = MagicMock()
+        self.assertFalse(self.check_permission(transaction))
+
+    def test_permissions_passes_when_user_is_owner(self):
+        transaction = MagicMock(user=self.request.user)
+        self.assertTrue(self.check_permission(transaction))
+
+    def check_permission(self, transaction):
+        return IsOwner().has_object_permission(self.request, self.view, transaction)
