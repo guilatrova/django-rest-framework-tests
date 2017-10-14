@@ -30,20 +30,19 @@ class TransactionsUrlsTestCase(TestCase):
     def test_list_url_only_allows_get_and_post(self):
         resolver = self.resolve_by_name('transactions')
 
-        self.assertEqual(2, len(resolver.func.actions))
-        self.assertIn('get', resolver.func.actions)
-        self.assertIn('post', resolver.func.actions)
+        self.assert_has_actions(['get', 'post'], resolver.func.actions)
 
     def test_single_url_allows_all_methods_except_post(self):
         """All methods are: GET, PUT, PATCH and DELETE"""
         resolver = self.resolve_by_name('transaction', pk=1)
 
-        self.assertEqual(4, len(resolver.func.actions))
-        self.assertIn('get', resolver.func.actions)
-        self.assertIn('put', resolver.func.actions)
-        self.assertIn('patch', resolver.func.actions)
-        self.assertIn('delete', resolver.func.actions)
+        self.assert_has_actions(['get', 'put', 'patch', 'delete'], resolver.func.actions)
         
+    def assert_has_actions(self, allowed, actions):
+        self.assertEqual(len(allowed), len(actions))
+
+        for allows in allowed:
+            self.assertIn(allows, actions)
 
     def resolve_by_name(self, name, **kwargs):
         url = reverse(name, kwargs=kwargs)
