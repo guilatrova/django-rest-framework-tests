@@ -1,7 +1,9 @@
 from django.test import TestCase
 from django.urls import reverse, resolve
+from django.contrib.auth.models import User
 
 from transactions.views import TransactionViewSet
+from transactions.serializers import TransactionSerializer
 
 class TransactionsUrlsTestCase(TestCase):
 
@@ -47,3 +49,26 @@ class TransactionsUrlsTestCase(TestCase):
     def resolve_by_name(self, name, **kwargs):
         url = reverse(name, kwargs=kwargs)
         return resolve(url)
+
+class TransactionsSerializersTestCase(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='tester')
+        self.serializer_data = {
+            'description': 'description', 
+            'value': 10,
+            'user': self.user.id
+        }
+
+    def test_serializer_should_not_allows_value_0(self):
+        data = self.serializer_data
+        data['value'] = 0
+
+        serializer = TransactionSerializer(data=data)
+
+        self.assertFalse(serializer.is_valid())
+        self.assertIn('value', serializer.errors)
+
+    def test_serializer_validates_correctly_data(self):
+        serializer = TransactionSerializer(data=self.serializer_data)
+
+        self.assertTrue(serializer.is_valid())
